@@ -163,6 +163,7 @@
             .toLowerCase();
     }
 
+    //
     function normalizePath(path) {
         return path
             .replace(/^\//, '')      // Entferne leading slash
