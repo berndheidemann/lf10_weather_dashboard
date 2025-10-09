@@ -36,7 +36,7 @@
             // 4) Änderungen speichern (nur einmal, nicht doppelt)
             box.removeEventListener('change', handleCheckboxChange);
             box.addEventListener('change', handleCheckboxChange);
-            
+
             function handleCheckboxChange() {
                 state[key][id] = box.checked;
                 saveState(state);
@@ -78,7 +78,7 @@
         if (progressTimeout) {
             clearTimeout(progressTimeout);
         }
-        
+
         const boxes = document.querySelectorAll('article input[type="checkbox"]');
         const currentPath = pageKey();
 
@@ -117,7 +117,7 @@
 
             // Bereinige den Link-Pfad
             const linkPath = normalizeHref(href);
-            
+
             // Entferne alte Indicators erstmal
             const oldIndicator = link.querySelector('.progress-indicator');
             if (oldIndicator) {
@@ -129,11 +129,11 @@
             let matched = false;
             for (const [savedPath, data] of Object.entries(progress)) {
                 const normalizedSavedPath = normalizePath(savedPath);
-                
+
                 // Exact match oder endsWith match
                 if (normalizedSavedPath === linkPath || normalizedSavedPath.endsWith(linkPath)) {
                     const { checked, total, completed } = data;
-                    
+
                     const indicator = document.createElement('span');
                     indicator.className = 'progress-indicator';
 
