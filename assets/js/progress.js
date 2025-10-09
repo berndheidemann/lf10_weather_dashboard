@@ -72,7 +72,12 @@
 
     function updateNavigationProgress() {
         const boxes = document.querySelectorAll('article input[type="checkbox"]');
-        if (boxes.length === 0) return;
+
+        // Wenn keine Checkboxen vorhanden sind, nur die gespeicherten Progress-Anzeigen laden
+        if (boxes.length === 0) {
+            loadAllProgress();
+            return;
+        }
 
         const checked = Array.from(boxes).filter(cb => cb.checked).length;
         const total = boxes.length;
