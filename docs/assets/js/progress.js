@@ -1,5 +1,6 @@
 (function () {
     const STORAGE_KEY = 'lf10-weather-progress-v1';
+    let progressTimeout = null;
 
     // Material lädt Seiten "instant": document$ triggert nach jedem Seitenwechsel
     document.addEventListener('DOMContentLoaded', init);
@@ -32,17 +33,20 @@
                 box.checked = !!state[key][id];
             }
 
-            // 4) Änderungen speichern
-            box.addEventListener('change', () => {
+            // 4) Änderungen speichern (nur einmal, nicht doppelt)
+            box.removeEventListener('change', handleCheckboxChange);
+            box.addEventListener('change', handleCheckboxChange);
+            
+            function handleCheckboxChange() {
                 state[key][id] = box.checked;
                 saveState(state);
                 updateCounters();
-                updateNavigationProgress();
-            });
+                scheduleProgressUpdate();
+            }
         });
 
         updateCounters();
-        updateNavigationProgress();
+        scheduleProgressUpdate();
     }
 
     function pageKey() {
@@ -69,7 +73,12 @@
 
     // ========== Neue Funktionen für Navigation-Färbung ==========
 
-    function updateNavigationProgress() {
+    function scheduleProgressUpdate() {
+        // Cancel vorherigen Timeout um mehrfache Aufrufe zu vermeiden
+        if (progressTimeout) {
+            clearTimeout(progressTimeout);
+        }
+        
         const boxes = document.querySelectorAll('article input[type="checkbox"]');
         const currentPath = pageKey();
 
@@ -80,9 +89,11 @@
             savePageProgress(currentPath, checked, total);
         }
 
-        // Immer alle gespeicherten Progress-Anzeigen laden
-        // (mit kleinem Delay für Material's Navigation-Rendering)
-        setTimeout(() => loadAllProgress(), 50);
+        // Mit Delay alle Progress-Anzeigen aktualisieren
+        progressTimeout = setTimeout(() => {
+            loadAllProgress();
+            progressTimeout = null;
+        }, 100);
     }
 
     function savePageProgress(path, checked, total) {
@@ -90,7 +101,7 @@
         progress[path] = {
             checked,
             total,
-            completed: checked === total,
+            completed: checked === total && total > 0,
             lastUpdate: new Date().toISOString()
         };
         localStorage.setItem('tutorialProgress', JSON.stringify(progress));
@@ -104,19 +115,25 @@
             const href = link.getAttribute('href');
             if (!href) return;
 
-            const pageName = href.replace(/\.\.\//g, '').replace('.md', '').replace(/\//g, '');
+            // Bereinige den Link-Pfad
+            const linkPath = normalizeHref(href);
+            
+            // Entferne alte Indicators erstmal
+            const oldIndicator = link.querySelector('.progress-indicator');
+            if (oldIndicator) {
+                oldIndicator.remove();
+            }
+            link.classList.remove('completed', 'in-progress');
 
-            Object.keys(progress).forEach(savedPath => {
-                if (savedPath.includes(pageName) || pageName.includes(savedPath.replace(/\//g, ''))) {
-                    const { checked, total, completed } = progress[savedPath];
-
-                    const oldIndicator = link.querySelector('.progress-indicator');
-                    if (oldIndicator) {
-                        oldIndicator.remove();
-                    }
-
-                    link.classList.remove('completed', 'in-progress');
-
+            // Suche matching progress
+            let matched = false;
+            for (const [savedPath, data] of Object.entries(progress)) {
+                const normalizedSavedPath = normalizePath(savedPath);
+                
+                // Exact match oder endsWith match
+                if (normalizedSavedPath === linkPath || normalizedSavedPath.endsWith(linkPath)) {
+                    const { checked, total, completed } = data;
+                    
                     const indicator = document.createElement('span');
                     indicator.className = 'progress-indicator';
 
@@ -126,13 +143,30 @@
                     } else if (checked > 0) {
                         indicator.innerHTML = ` (${checked}/${total})`;
                         link.classList.add('in-progress');
-                    } else {
+                    } else if (total > 0) {
                         indicator.innerHTML = ` (0/${total})`;
                     }
 
                     link.appendChild(indicator);
+                    matched = true;
+                    break; // Nur ein Match pro Link
                 }
-            });
+            }
         });
+    }
+
+    function normalizeHref(href) {
+        return href
+            .replace(/^\.\.\//, '')  // Entferne führende ../
+            .replace(/\.md$/, '')    // Entferne .md
+            .replace(/\/$/, '')      // Entferne trailing slash
+            .toLowerCase();
+    }
+
+    function normalizePath(path) {
+        return path
+            .replace(/^\//, '')      // Entferne leading slash
+            .replace(/\/$/, '')      // Entferne trailing slash
+            .toLowerCase();
     }
 })();
