@@ -8,7 +8,7 @@ theme:
     # Navigation und Layout
     - navigation.sections
     - navigation.top
-    - toc.integrate
+    # - toc.integrate
     # Suche & UX
     - search.suggest
     - search.highlight
@@ -30,14 +30,14 @@ nav:
       - Story 7 – Navigation: stories/story-07-navigation.md
       - Story 8 – Info-Seite: stories/story-08-info-seite.md
   - Umsetzungshilfen:
-      - Story 1 – Stadt suchen: umsetzungshilfen/story-01-stadt-suchen.md
-      - Story 2 – Stadt auswählen: umsetzungshilfen/story-02-stadt-auswaehlen.md
-      - Story 3 – 7-Tage-Vorhersage: umsetzungshilfen/story-03-sieben-tage-vorhersage.md
-      - Story 4 – Tagesdetails: umsetzungshilfen/story-04-tagesdetails.md
-      - Story 5 – Favorit speichern: umsetzungshilfen/story-05-favorit-speichern.md
-      - Story 6 – Favoritenliste: umsetzungshilfen/story-06-favoritenliste.md
-      - Story 7 – Navigation: umsetzungshilfen/story-07-navigation.md
-      - Story 8 – Info-Seite: umsetzungshilfen/story-08-info-seite.md
+      - Hilfen Story 1: umsetzungshilfen/story-01-stadt-suchen.md
+      - Hilfen Story 2: umsetzungshilfen/story-02-stadt-auswaehlen.md
+      - Hilfen Story 3: umsetzungshilfen/story-03-sieben-tage-vorhersage.md
+      - Hilfen Story 4: umsetzungshilfen/story-04-tagesdetails.md
+      - Hilfen Story 5: umsetzungshilfen/story-05-favorit-speichern.md
+      - Hilfen Story 6: umsetzungshilfen/story-06-favoritenliste.md
+      - Hilfen Story 7: umsetzungshilfen/story-07-navigation.md
+      - Hilfen Story 8: umsetzungshilfen/story-08-info-seite.md
 
 markdown_extensions:
   - admonition
