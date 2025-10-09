@@ -1,6 +1,5 @@
 (function () {
     const STORAGE_KEY = 'lf10-weather-progress-v1';
-    let progressTimeout = null;
 
     // Material lädt Seiten "instant": document$ triggert nach jedem Seitenwechsel
     document.addEventListener('DOMContentLoaded', init);
@@ -41,12 +40,10 @@
                 state[key][id] = box.checked;
                 saveState(state);
                 updateCounters();
-                scheduleProgressUpdate();
             }
         });
 
         updateCounters();
-        scheduleProgressUpdate();
     }
 
     function pageKey() {
@@ -71,103 +68,5 @@
         if (tDone) tDone.textContent = String(done);
     }
 
-    // ========== Neue Funktionen für Navigation-Färbung ==========
 
-    function scheduleProgressUpdate() {
-        // Cancel vorherigen Timeout um mehrfache Aufrufe zu vermeiden
-        if (progressTimeout) {
-            clearTimeout(progressTimeout);
-        }
-
-        const boxes = document.querySelectorAll('article input[type="checkbox"]');
-        const currentPath = pageKey();
-
-        // Wenn Checkboxen vorhanden sind, Progress speichern
-        if (boxes.length > 0) {
-            const checked = Array.from(boxes).filter(cb => cb.checked).length;
-            const total = boxes.length;
-            savePageProgress(currentPath, checked, total);
-        }
-
-        // Mit Delay alle Progress-Anzeigen aktualisieren
-        progressTimeout = setTimeout(() => {
-            loadAllProgress();
-            progressTimeout = null;
-        }, 100);
-    }
-
-    function savePageProgress(path, checked, total) {
-        const progress = JSON.parse(localStorage.getItem('tutorialProgress') || '{}');
-        progress[path] = {
-            checked,
-            total,
-            completed: checked === total && total > 0,
-            lastUpdate: new Date().toISOString()
-        };
-        localStorage.setItem('tutorialProgress', JSON.stringify(progress));
-    }
-
-    function loadAllProgress() {
-        const progress = JSON.parse(localStorage.getItem('tutorialProgress') || '{}');
-        const navLinks = document.querySelectorAll('.md-nav__link');
-
-        navLinks.forEach(link => {
-            const href = link.getAttribute('href');
-            if (!href) return;
-
-            // Bereinige den Link-Pfad
-            const linkPath = normalizeHref(href);
-
-            // Entferne alte Indicators erstmal
-            const oldIndicator = link.querySelector('.progress-indicator');
-            if (oldIndicator) {
-                oldIndicator.remove();
-            }
-            link.classList.remove('completed', 'in-progress');
-
-            // Suche matching progress
-            let matched = false;
-            for (const [savedPath, data] of Object.entries(progress)) {
-                const normalizedSavedPath = normalizePath(savedPath);
-
-                // Exact match oder endsWith match
-                if (normalizedSavedPath === linkPath || normalizedSavedPath.endsWith(linkPath)) {
-                    const { checked, total, completed } = data;
-
-                    const indicator = document.createElement('span');
-                    indicator.className = 'progress-indicator';
-
-                    if (completed) {
-                        indicator.innerHTML = ' ✓';
-                        link.classList.add('completed');
-                    } else if (checked > 0) {
-                        indicator.innerHTML = ` (${checked}/${total})`;
-                        link.classList.add('in-progress');
-                    } else if (total > 0) {
-                        indicator.innerHTML = ` (0/${total})`;
-                    }
-
-                    link.appendChild(indicator);
-                    matched = true;
-                    break; // Nur ein Match pro Link
-                }
-            }
-        });
-    }
-
-    function normalizeHref(href) {
-        return href
-            .replace(/^\.\.\//, '')  // Entferne führende ../
-            .replace(/\.md$/, '')    // Entferne .md
-            .replace(/\/$/, '')      // Entferne trailing slash
-            .toLowerCase();
-    }
-
-    //
-    function normalizePath(path) {
-        return path
-            .replace(/^\//, '')      // Entferne leading slash
-            .replace(/\/$/, '')      // Entferne trailing slash
-            .toLowerCase();
-    }
 })();
