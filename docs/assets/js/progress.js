@@ -37,10 +37,13 @@
                 state[key][id] = box.checked;
                 saveState(state);
                 updateCounters();
+                updateNavigationProgress();
             });
         });
 
         updateCounters();
+        updateNavigationProgress();
+        loadAllProgress();
     }
 
     function pageKey() {
@@ -63,5 +66,107 @@
         const tDone = document.getElementById('t-done');
         if (tTotal) tTotal.textContent = String(total);
         if (tDone) tDone.textContent = String(done);
+    }
+
+    // ========== Neue Funktionen für Navigation-Färbung ==========
+
+    function updateNavigationProgress() {
+        const boxes = document.querySelectorAll('article input[type="checkbox"]');
+        if (boxes.length === 0) return;
+
+        const checked = Array.from(boxes).filter(cb => cb.checked).length;
+        const total = boxes.length;
+        const progress = total > 0 ? (checked / total) * 100 : 0;
+
+        const currentPath = pageKey();
+
+        // Speichere Page-Progress
+        savePageProgress(currentPath, checked, total);
+
+        // Update Navigation für aktuelle Seite
+        updateNavLinkForCurrentPage(currentPath, checked, total, progress);
+    }
+
+    function updateNavLinkForCurrentPage(pagePath, checked, total, progress) {
+        const navLinks = document.querySelectorAll('.md-nav__link');
+
+        navLinks.forEach(link => {
+            const href = link.getAttribute('href');
+            if (href && pagePath.includes(href.replace(/\.\.\//g, '').replace('.md', '').replace(/\//g, ''))) {
+                // Entferne alte Klassen und Indicator
+                link.classList.remove('completed', 'in-progress');
+                const oldIndicator = link.querySelector('.progress-indicator');
+                if (oldIndicator) {
+                    oldIndicator.remove();
+                }
+
+                // Füge neuen Progress-Indicator hinzu
+                const indicator = document.createElement('span');
+                indicator.className = 'progress-indicator';
+
+                if (progress === 100) {
+                    indicator.innerHTML = ' ✓';
+                    link.classList.add('completed');
+                } else if (progress > 0) {
+                    indicator.innerHTML = ` (${checked}/${total})`;
+                    link.classList.add('in-progress');
+                } else {
+                    indicator.innerHTML = ` (0/${total})`;
+                }
+
+                link.appendChild(indicator);
+            }
+        });
+    }
+
+    function savePageProgress(path, checked, total) {
+        const progress = JSON.parse(localStorage.getItem('tutorialProgress') || '{}');
+        progress[path] = {
+            checked,
+            total,
+            completed: checked === total,
+            lastUpdate: new Date().toISOString()
+        };
+        localStorage.setItem('tutorialProgress', JSON.stringify(progress));
+    }
+
+    function loadAllProgress() {
+        const progress = JSON.parse(localStorage.getItem('tutorialProgress') || '{}');
+        const navLinks = document.querySelectorAll('.md-nav__link');
+
+        navLinks.forEach(link => {
+            const href = link.getAttribute('href');
+            if (!href) return;
+
+            const pageName = href.replace(/\.\.\//g, '').replace('.md', '').replace(/\//g, '');
+
+            Object.keys(progress).forEach(savedPath => {
+                if (savedPath.includes(pageName) || pageName.includes(savedPath.replace(/\//g, ''))) {
+                    const { checked, total, completed } = progress[savedPath];
+
+                    const oldIndicator = link.querySelector('.progress-indicator');
+                    if (oldIndicator) {
+                        oldIndicator.remove();
+                    }
+
+                    link.classList.remove('completed', 'in-progress');
+
+                    const indicator = document.createElement('span');
+                    indicator.className = 'progress-indicator';
+
+                    if (completed) {
+                        indicator.innerHTML = ' ✓';
+                        link.classList.add('completed');
+                    } else if (checked > 0) {
+                        indicator.innerHTML = ` (${checked}/${total})`;
+                        link.classList.add('in-progress');
+                    } else {
+                        indicator.innerHTML = ` (0/${total})`;
+                    }
+
+                    link.appendChild(indicator);
+                }
+            });
+        });
     }
 })();
