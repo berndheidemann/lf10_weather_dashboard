@@ -1,5 +1,5 @@
 (function () {
-    const STORAGE_KEY = 'lf8-progress-v1';
+    const STORAGE_KEY = 'lf10-weather-progress-v1';
 
     // Material lädt Seiten "instant": document$ triggert nach jedem Seitenwechsel
     document.addEventListener('DOMContentLoaded', init);
