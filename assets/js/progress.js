@@ -43,7 +43,6 @@
 
         updateCounters();
         updateNavigationProgress();
-        loadAllProgress();
     }
 
     function pageKey() {
@@ -72,56 +71,18 @@
 
     function updateNavigationProgress() {
         const boxes = document.querySelectorAll('article input[type="checkbox"]');
-
-        // Wenn keine Checkboxen vorhanden sind, nur die gespeicherten Progress-Anzeigen laden
-        if (boxes.length === 0) {
-            loadAllProgress();
-            return;
-        }
-
-        const checked = Array.from(boxes).filter(cb => cb.checked).length;
-        const total = boxes.length;
-        const progress = total > 0 ? (checked / total) * 100 : 0;
-
         const currentPath = pageKey();
 
-        // Speichere Page-Progress
-        savePageProgress(currentPath, checked, total);
+        // Wenn Checkboxen vorhanden sind, Progress speichern
+        if (boxes.length > 0) {
+            const checked = Array.from(boxes).filter(cb => cb.checked).length;
+            const total = boxes.length;
+            savePageProgress(currentPath, checked, total);
+        }
 
-        // Update Navigation für aktuelle Seite
-        updateNavLinkForCurrentPage(currentPath, checked, total, progress);
-    }
-
-    function updateNavLinkForCurrentPage(pagePath, checked, total, progress) {
-        const navLinks = document.querySelectorAll('.md-nav__link');
-
-        navLinks.forEach(link => {
-            const href = link.getAttribute('href');
-            if (href && pagePath.includes(href.replace(/\.\.\//g, '').replace('.md', '').replace(/\//g, ''))) {
-                // Entferne alte Klassen und Indicator
-                link.classList.remove('completed', 'in-progress');
-                const oldIndicator = link.querySelector('.progress-indicator');
-                if (oldIndicator) {
-                    oldIndicator.remove();
-                }
-
-                // Füge neuen Progress-Indicator hinzu
-                const indicator = document.createElement('span');
-                indicator.className = 'progress-indicator';
-
-                if (progress === 100) {
-                    indicator.innerHTML = ' ✓';
-                    link.classList.add('completed');
-                } else if (progress > 0) {
-                    indicator.innerHTML = ` (${checked}/${total})`;
-                    link.classList.add('in-progress');
-                } else {
-                    indicator.innerHTML = ` (0/${total})`;
-                }
-
-                link.appendChild(indicator);
-            }
-        });
+        // Immer alle gespeicherten Progress-Anzeigen laden
+        // (mit kleinem Delay für Material's Navigation-Rendering)
+        setTimeout(() => loadAllProgress(), 50);
     }
 
     function savePageProgress(path, checked, total) {
