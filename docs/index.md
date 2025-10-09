@@ -1,9 +1,9 @@
-# Weather Dashboard Lernmaterial
+# Lernsituation Weather Dashboard
 
 
 ## Projektbeschreibung
 
-In diesem Projekt wird ein **Weather Dashboard** als React-Webanwendung entwickelt. Die App ermöglicht es Nutzern, Wetterdaten für beliebige Städte weltweit abzurufen und zu visualisieren.
+In dieser Lernsituation wird ein **Weather Dashboard** als React-Webanwendung entwickelt. Die App ermöglicht es Nutzern, Wetterdaten für beliebige Städte weltweit abzurufen und zu visualisieren.
 
 ## Hauptfunktionen:
 - **Städtesuche**: Nutzer können nach Städten suchen und erhalten eine Liste mit Treffern inkl. Name, Land und Einwohnerzahl
@@ -21,7 +21,7 @@ Die Anwendung nutzt die **Open-Meteo API** für Geocoding und Wetterdaten und se
 - [Guideline: Chatbots in der Lernsituation nutzen](./guideline-chatbots.md)
 
 ## User Stories
-Arbeite die User Stories der Reihe nach ab. Jede Story enthält Akzeptanzkriterien, Tasks und eine detaillierte Umsetzungshilfe. Nutze aktiv die Hilfe von Chatbots, aber beachte die Hinweise in der Guideline Chatbots. Generiere keinen Code, sondern lasse dir nur Hilfestellungen geben.
+Arbeite die User Stories der Reihe nach ab. Jede Story enthält Akzeptanzkriterien, Tasks und eine detaillierte Umsetzungshilfe. Nutze aktiv die Hilfe von Chatbots, aber beachte die Hinweise in der Guideline Chatbots. Generiere keinen Code, sondern nutze den Bot als Coach.
 
 - [Story 1 – Stadt suchen](./stories/story-01-stadt-suchen.md)
 - [Story 2 – Stadt auswählen](./stories/story-02-stadt-auswaehlen.md)
