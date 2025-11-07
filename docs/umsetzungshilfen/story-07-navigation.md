@@ -4,100 +4,115 @@
 ```
 src/
   components/
-    AppNavbar.tsx          # Navbar mit Navigation
-    Layout.tsx             # Layout-Komponente mit Outlet
+    Navbar.tsx             # Navbar mit Navigation
   pages/
-    SearchPage.tsx
-    FavoritesPage.tsx
-    CityDetailPage.tsx
+    HomePage.tsx
     AboutPage.tsx
-  router/
-    AppRouter.tsx          # Optional: zentraler Ort für Routen
+    ProfilePage.tsx
+  App.tsx                  # Router-Setup
 ```
 
 ## Router-Setup
-- Definiere Routen wie `/`, `/favorites`, `/about` und `/city`.
-- Verwende `BrowserRouter` (oder `HashRouter`, je nach Setup) im Wurzel-Tree.
+- Definiere Routen wie `/`, `/about`, `/profile`.
+- Verwende `BrowserRouter` im Wurzel-Tree (`main.tsx` oder `App.tsx`).
+- Die Navbar wird direkt in `App.tsx` über dem Routing-Bereich eingebunden.
 
 ## Exkurs: `NavLink` und aktive Styles
-- `NavLink` liefert anhand der aktiven Route unterschiedliche Klassen.
-- Nutze dies, um die aktive Seite visuell hervorzuheben (z. B. `active`-Klasse).
+- `NavLink` ist eine spezielle Variante von `Link` aus React Router.
+- Es setzt automatisch die CSS-Klasse `active`, wenn die zugehörige Route aktiv ist.
+- Nutze dies, um die aktive Seite visuell hervorzuheben (z. B. fett, unterstrichen oder farbig).
 
-## Exkurs: Layout-Komponenten
+## Einfaches Routing-Setup
 
-### Warum Layout-Komponenten?
-Ohne eine zentrale Layout-Komponente müsste jede einzelne Page-Komponente die Navbar und andere gemeinsame UI-Elemente selbst einbinden. Das führt zu:
-- **Code-Duplikation** (Navbar-Code in jeder Page wiederholt)
-- **Inkonsistenzen** (unterschiedliche Navbar-Implementierungen)
-- **Schwere Wartbarkeit** (Änderungen müssen überall gemacht werden)
+Für die meisten Anwendungen reicht ein einfaches, flaches Routing ohne verschachtelte Routes.
 
-### Lösung: Layout-Komponente mit React Router Outlet
-Eine Layout-Komponente umschließt alle Pages und definiert die gemeinsame Struktur (Header, Navbar, Footer, etc.). Der Page-spezifische Inhalt wird über das `<Outlet />`-Element von React Router dynamisch eingefügt.
-
-**Allgemeines Beispiel:**
+**Struktur in App.tsx:**
 ```typescript
-// src/components/Layout.tsx
-import { Outlet } from 'react-router-dom';
-import { Navigation } from './Navigation';
-
-export const Layout = () => {
-  return (
-    <div className="app-layout">
-      <header>
-        <h1>Meine App</h1>
-      </header>
-      
-      <Navigation />
-      
-      <main className="content">
-        {/* Outlet rendert die aktuelle Page-Komponente basierend auf der Route */}
-        <Outlet />
-      </main>
-      
-      <footer>
-        <p>© 2025 Meine App</p>
-      </footer>
-    </div>
-  );
-};
-```
-
-**Router-Konfiguration mit verschachtelten Routes:**
-```typescript
-// src/App.tsx oder main.tsx
+// src/App.tsx
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { Layout } from './components/Layout';
+import { Navbar } from './components/Navbar';
 import { HomePage } from './pages/HomePage';
 import { AboutPage } from './pages/AboutPage';
-import { ContactPage } from './pages/ContactPage';
+import { ProfilePage } from './pages/ProfilePage';
 
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        {/* Layout als Parent-Route */}
-        <Route path="/" element={<Layout />}>
-          {/* Alle Child-Routes werden im <Outlet /> des Layouts gerendert */}
-          <Route index element={<HomePage />} />
-          <Route path="about" element={<AboutPage />} />
-          <Route path="contact" element={<ContactPage />} />
-        </Route>
-      </Routes>
+      {/* Navbar ist für alle Seiten sichtbar */}
+      <Navbar />
+      
+      {/* Content-Bereich mit Routes */}
+      <main className="container mt-4">
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+        </Routes>
+      </main>
     </BrowserRouter>
   );
 }
+
+export default App;
 ```
 
-**Wie es funktioniert:**
-1. Das `Layout` wird für alle Child-Routes gerendert
-2. Das `<Outlet />` im Layout wird durch die jeweilige Page-Komponente ersetzt
-3. Bei `/` wird `<HomePage />` im Outlet gerendert
-4. Bei `/about` wird `<AboutPage />` im Outlet gerendert
-5. Header, Navigation und Footer bleiben **persistent** (werden nicht neu gemountet)
+**Navbar mit NavLink:**
+```typescript
+// src/components/Navbar.tsx
+import { NavLink } from 'react-router-dom';
+import './Navbar.css';
 
-### Vorteile dieser Lösung:
-- ✅ **Single Source of Truth**: Navbar, Header, Footer nur einmal definiert
-- ✅ **Konsistenz**: Alle Pages haben die gleiche Grundstruktur
-- ✅ **Einfache Wartung**: Änderungen nur an einer Stelle
-- ✅ **Performance**: Gemeinsame Elemente werden nicht bei jedem Seitenwechsel neu gemountet
-- ✅ **Saubere Trennung**: Page-Komponenten kümmern sich nur um ihren spezifischen Inhalt
+export const Navbar = () => {
+  return (
+    <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
+      <div className="container-fluid">
+        <span className="navbar-brand">Meine App</span>
+        
+        <div className="navbar-nav">
+          <NavLink to="/" className="nav-link">
+            Home
+          </NavLink>
+          <NavLink to="/about" className="nav-link">
+            Über uns
+          </NavLink>
+          <NavLink to="/profile" className="nav-link">
+            Profil
+          </NavLink>
+        </div>
+      </div>
+    </nav>
+  );
+};
+```
+
+**CSS für aktive Links:**
+```css
+/* src/components/Navbar.css */
+.nav-link.active {
+  font-weight: bold;
+  text-decoration: underline;
+  color: #ffffff !important;
+}
+
+/* Optional: Hover-Effekt */
+.nav-link:hover {
+  opacity: 0.8;
+}
+```
+
+## Wie es funktioniert:
+1. Die Navbar steht **außerhalb** der `<Routes>`, daher ist sie auf allen Seiten sichtbar
+2. `NavLink` erhält automatisch die Klasse `active`, wenn die Route aktiv ist
+3. Bei Klick auf einen Link navigiert React Router zur entsprechenden Route
+4. Die passende Page-Komponente wird in `<Routes>` gerendert
+5. Die Navbar bleibt persistent (wird nicht neu gemountet)
+
+## Vorteile dieser Lösung:
+- ✅ **Einfach und übersichtlich**: Keine komplexe Verschachtelung nötig
+- ✅ **Navbar persistent**: Wird bei Seitenwechsel nicht neu gerendert
+- ✅ **Automatische aktive Klasse**: React Router setzt `active` automatisch
+- ✅ **Flexibel erweiterbar**: Neue Routes einfach zur Liste hinzufügen
+- ✅ **Perfekt für kleine bis mittlere Apps**: Übersichtlich und wartbar
+
+## Hinweis zu komplexeren Layouts:
+Für sehr große Anwendungen mit vielen verschachtelten Bereichen (z.B. Admin-Dashboard mit Sidebar und Sub-Navigation) kann ein Layout-Pattern mit `Outlet` sinnvoll sein. Für die meisten Projekte ist die hier gezeigte einfache Lösung jedoch ausreichend und übersichtlicher.

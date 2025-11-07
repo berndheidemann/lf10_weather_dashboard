@@ -26,6 +26,22 @@ Installiere die notwendigen Abhängigkeiten für das Projekt:
 # Basis-Dependencies installieren
 npm install
 
+# Bootstrap für Styling mit CSS-Klassen
+npm install bootstrap
+
+# React Bootstrap für Bootstrap-Komponenten mit React-Integration
+npm install react-bootstrap
+
+```
+
+### Bootstrap einbinden
+
+Nach der Installation muss Bootstrap in dein Projekt eingebunden werden:
+
+**In `main.tsx` oder `App.tsx` (am Anfang der Datei):**
+```typescript
+// Bootstrap CSS importieren
+import 'bootstrap/dist/css/bootstrap.min.css';
 ```
 
 ### Development Server starten
